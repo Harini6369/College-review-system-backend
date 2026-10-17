@@ -5,6 +5,7 @@ import mongoSanitize from 'express-mongo-sanitize';
 import swaggerUi from 'swagger-ui-express';
 import mongoose from 'mongoose';
 import env from './config/env.js';
+import corsOptions from './config/corsOptions.js';
 import routes from './routes/index.js';
 import notFound from './middleware/notFound.js';
 import errorHandler from './middleware/errorHandler.js';
@@ -17,11 +18,9 @@ app.disable('x-powered-by');
 app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
-app.use(cors({
-  origin: env.corsOrigin,
-  credentials: env.corsOrigin !== '*',
-}));
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: false, limit: '100kb' }));
 app.use(mongoSanitize());

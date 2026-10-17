@@ -32,6 +32,10 @@ Set the same values as local `.env` (lines 12–23): `MONGODB_URI`, `JWT_SECRET`
 
 Atlas: **Network Access → Allow access from anywhere** (or Render outbound IPs).
 
+**CORS:** Set `CORS_ORIGIN` to your frontend URL(s), comma-separated, e.g.  
+`https://college-review-system-frontend.onrender.com`  
+(and `http://localhost:5173` if you still test locally against Render). Redeploy after changing env vars.
+
 ### Step 4 — Frontend (separate repo)
 
 Deploy `College-review-system-frontend` as a **Static Site** using its `render.yaml`. Set `VITE_API_URL` to your backend `https://….onrender.com`.

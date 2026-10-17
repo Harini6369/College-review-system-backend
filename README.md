@@ -96,7 +96,7 @@ docker compose up --build
 
 Compose starts:
 
-- `api` on port `3000`
+- `api` on port `5000` (or `PORT` from `.env`)
 - `mongo:7` with a named volume `mongo_data`
 - a MongoDB health check
 - API startup that waits for MongoDB readiness
