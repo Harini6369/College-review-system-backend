@@ -11,18 +11,10 @@ async function upsertUser({ name, email, password, role }) {
     return user;
   }
 
-  let changed = false;
-  if (user.name !== name) {
-    user.name = name;
-    changed = true;
-  }
-  if (user.role !== role) {
-    user.role = role;
-    changed = true;
-  }
-  if (changed) {
-    await user.save();
-  }
+  user.name = name;
+  user.role = role;
+  user.password = password;
+  await user.save();
   return user;
 }
 
@@ -47,12 +39,26 @@ async function upsertReview({ collegeId, userId, rating, comment }) {
   return Review.create({ collegeId, userId, rating, comment });
 }
 
-async function seed() {
-  if (!env.admin.password) {
-    throw new Error('ADMIN_PASSWORD must be set before running the seed script');
-  }
+function printUserTable(rows) {
+  const headers = ['Role', 'Name', 'Email', 'Password (from .env)'];
+  const widths = headers.map((header, index) =>
+    Math.max(header.length, ...rows.map((row) => String(row[index]).length))
+  );
 
-  await connectDatabase(env.mongodbUri, { retries: 5, delayMs: 1000 });
+  const line = (cells) =>
+    cells.map((cell, index) => String(cell).padEnd(widths[index])).join('  ');
+
+  console.log('\nSeeded users (login with email + password):\n');
+  console.log(line(headers));
+  console.log(line(widths.map((w) => '-'.repeat(w))));
+  rows.forEach((row) => console.log(line(row)));
+  console.log('');
+}
+
+export async function runSeed() {
+  if (!env.admin.password) {
+    throw new Error('ADMIN_PASSWORD must be set in .env before seeding users');
+  }
 
   const admin = await upsertUser({
     name: env.admin.name,
@@ -62,21 +68,21 @@ async function seed() {
   });
 
   const teacher = await upsertUser({
-    name: 'Sample Teacher',
+    name: env.seed.teacherName,
     email: env.seed.teacherEmail,
     password: env.seed.teacherPassword,
     role: 'teacher',
   });
 
   const student = await upsertUser({
-    name: 'Sample Student',
+    name: env.seed.studentName,
     email: env.seed.studentEmail,
     password: env.seed.studentPassword,
     role: 'student',
   });
 
   const studentTwo = await upsertUser({
-    name: 'Second Student',
+    name: env.seed.studentTwoName,
     email: env.seed.studentTwoEmail,
     password: env.seed.studentTwoPassword,
     role: 'student',
@@ -140,22 +146,34 @@ async function seed() {
     comment: 'Rigorous academics and a highly motivated student body.',
   });
 
-  console.log('Seed completed');
-  console.log(`Admin: ${admin.email}`);
-  console.log(`Teacher: ${teacher.email}`);
-  console.log(`Student: ${student.email}`);
-  console.log(`Student two: ${studentTwo.email}`);
-  console.log(`Colleges: ${colleges.length}`);
+  printUserTable([
+    ['admin', env.admin.name, env.admin.email, env.admin.password],
+    ['teacher', env.seed.teacherName, env.seed.teacherEmail, env.seed.teacherPassword],
+    ['student', env.seed.studentName, env.seed.studentEmail, env.seed.studentPassword],
+    ['student', env.seed.studentTwoName, env.seed.studentTwoEmail, env.seed.studentTwoPassword],
+  ]);
+
+  console.log(`Colleges in database: ${colleges.length}`);
+  console.log('Seed completed.\n');
+
+  return { admin, teacher, student, studentTwo, colleges };
 }
 
-seed()
-  .then(async () => {
-    await disconnectDatabase();
-    process.exit(0);
-  })
-  .catch(async (err) => {
-    console.error('Seed failed');
-    console.error(err.message);
-    await disconnectDatabase();
-    process.exit(1);
-  });
+async function seedCli() {
+  await connectDatabase(env.mongodbUri, { retries: 5, delayMs: 1000 });
+  await runSeed();
+  await disconnectDatabase();
+}
+
+const isCli = process.argv[1]?.includes('seed.js');
+
+if (isCli) {
+  seedCli()
+    .then(() => process.exit(0))
+    .catch(async (err) => {
+      console.error('Seed failed');
+      console.error(err.message);
+      await disconnectDatabase();
+      process.exit(1);
+    });
+}

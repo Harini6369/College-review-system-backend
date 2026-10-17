@@ -41,6 +41,7 @@ const healthHandler = (req, res) => {
 };
 
 app.post('/health', healthHandler);
+app.get('/health', healthHandler);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapi, { explorer: true }));
 app.get('/openapi.json', (req, res) => res.json(openapi));

@@ -5,6 +5,11 @@ import app from './app.js';
 async function start() {
   await connectDatabase(env.mongodbUri);
 
+  if (env.seedOnStart) {
+    const { runSeed } = await import('./scripts/seed.js');
+    await runSeed();
+  }
+
   const server = app.listen(env.port, () => {
     console.log(`API listening on port ${env.port}`);
   });

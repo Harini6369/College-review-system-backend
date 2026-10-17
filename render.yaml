@@ -1,0 +1,49 @@
+# Blueprint for Render (Node API). File must live in repo root and be pushed to GitHub.
+# If deploy still runs `cargo build`, fix the service in Dashboard (see RENDER.md).
+
+services:
+  - type: web
+    name: college-review-system-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    preDeployCommand: npm run seed
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SEED_ON_START
+        value: "false"
+      - key: JWT_EXPIRES_IN
+        value: 1d
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: ADMIN_NAME
+        value: System Admin
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SEED_TEACHER_NAME
+        value: Sample Teacher
+      - key: SEED_TEACHER_EMAIL
+        sync: false
+      - key: SEED_TEACHER_PASSWORD
+        sync: false
+      - key: SEED_STUDENT_NAME
+        value: Sample Student
+      - key: SEED_STUDENT_EMAIL
+        sync: false
+      - key: SEED_STUDENT_PASSWORD
+        sync: false
+      - key: SEED_STUDENT_TWO_NAME
+        value: Second Student
+      - key: SEED_STUDENT_TWO_EMAIL
+        sync: false
+      - key: SEED_STUDENT_TWO_PASSWORD
+        sync: false

@@ -20,12 +20,16 @@ const envSchema = Joi.object({
   ADMIN_NAME: Joi.string().default('System Admin'),
   ADMIN_EMAIL: Joi.string().email().default('admin@example.com'),
   ADMIN_PASSWORD: Joi.string().min(8).optional(),
+  SEED_TEACHER_NAME: Joi.string().default('Sample Teacher'),
   SEED_TEACHER_EMAIL: Joi.string().email().default('teacher@example.com'),
   SEED_TEACHER_PASSWORD: Joi.string().min(8).default('Teacher123'),
+  SEED_STUDENT_NAME: Joi.string().default('Sample Student'),
   SEED_STUDENT_EMAIL: Joi.string().email().default('student@example.com'),
   SEED_STUDENT_PASSWORD: Joi.string().min(8).default('Student123'),
+  SEED_STUDENT_TWO_NAME: Joi.string().default('Second Student'),
   SEED_STUDENT_TWO_EMAIL: Joi.string().email().default('student2@example.com'),
   SEED_STUDENT_TWO_PASSWORD: Joi.string().min(8).default('Student123'),
+  SEED_ON_START: Joi.boolean().truthy('true', '1').falsy('false', '0').default(false),
 }).unknown(true);
 
 const { error, value } = envSchema.validate(process.env, { abortEarly: false, convert: true });
@@ -57,13 +61,17 @@ const env = {
     password: value.ADMIN_PASSWORD,
   },
   seed: {
+    teacherName: value.SEED_TEACHER_NAME,
     teacherEmail: value.SEED_TEACHER_EMAIL.toLowerCase(),
     teacherPassword: value.SEED_TEACHER_PASSWORD,
+    studentName: value.SEED_STUDENT_NAME,
     studentEmail: value.SEED_STUDENT_EMAIL.toLowerCase(),
     studentPassword: value.SEED_STUDENT_PASSWORD,
+    studentTwoName: value.SEED_STUDENT_TWO_NAME,
     studentTwoEmail: value.SEED_STUDENT_TWO_EMAIL.toLowerCase(),
     studentTwoPassword: value.SEED_STUDENT_TWO_PASSWORD,
   },
+  seedOnStart: value.SEED_ON_START,
 };
 
 export default env;
