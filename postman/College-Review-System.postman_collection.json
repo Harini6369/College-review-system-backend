@@ -1,0 +1,189 @@
+{
+  "info": {
+    "name": "College Review System API (POST only)",
+    "description": "All `/api` routes use POST with JSON bodies. Import the environment file for tokens and IDs.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [{ "key": "baseUrl", "value": "http://localhost:5000" }],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{}" },
+        "url": "{{baseUrl}}/health"
+      }
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register student",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ada Student\",\n  \"email\": \"ada@example.com\",\n  \"password\": \"Password123\",\n  \"role\": \"student\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          }
+        },
+        {
+          "name": "Login admin",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.code === 200) {",
+                "  pm.environment.set('adminToken', pm.response.json().data.token);",
+                "}"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/api/auth/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Colleges",
+      "item": [
+        {
+          "name": "List colleges",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"page\": 1,\n  \"limit\": 10,\n  \"sortBy\": \"averageRating\",\n  \"sortOrder\": \"desc\"\n}"
+            },
+            "url": "{{baseUrl}}/api/colleges/list"
+          }
+        },
+        {
+          "name": "Create college",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": ["if (pm.response.code === 201) pm.environment.set('collegeId', pm.response.json().data.id);"],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Riverside College\",\n  \"description\": \"Sample college\",\n  \"location\": \"Riverside\",\n  \"website\": \"https://riverside.example.edu\"\n}"
+            },
+            "url": "{{baseUrl}}/api/colleges/create"
+          }
+        },
+        {
+          "name": "Get college",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": \"{{collegeId}}\"\n}" },
+            "url": "{{baseUrl}}/api/colleges/get"
+          }
+        },
+        {
+          "name": "Update college",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": \"{{collegeId}}\",\n  \"description\": \"Updated description\"\n}" },
+            "url": "{{baseUrl}}/api/colleges/update"
+          }
+        },
+        {
+          "name": "Delete college",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": \"{{collegeId}}\"\n}" },
+            "url": "{{baseUrl}}/api/colleges/delete"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "Create review",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": ["if (pm.response.code === 201) pm.environment.set('reviewId', pm.response.json().data.id);"],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{studentToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"collegeId\": \"{{collegeId}}\",\n  \"rating\": 5,\n  \"comment\": \"Great campus\"\n}"
+            },
+            "url": "{{baseUrl}}/api/colleges/reviews/create"
+          }
+        },
+        {
+          "name": "List college reviews",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"collegeId\": \"{{collegeId}}\",\n  \"page\": 1,\n  \"limit\": 10\n}" },
+            "url": "{{baseUrl}}/api/colleges/reviews/list"
+          }
+        },
+        {
+          "name": "Update review",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{studentToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": \"{{reviewId}}\",\n  \"comment\": \"Updated comment\"\n}" },
+            "url": "{{baseUrl}}/api/reviews/update"
+          }
+        },
+        {
+          "name": "Delete review",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{studentToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": \"{{reviewId}}\"\n}" },
+            "url": "{{baseUrl}}/api/reviews/delete"
+          }
+        }
+      ]
+    }
+  ]
+}
